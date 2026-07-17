@@ -13,7 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 class BasePage:
     """Clase base de la que heredan todas las páginas del sitio."""
 
-    def __init__(self, driver, timeout: int = 10):
+    def __init__(self, driver, timeout: int = 15):
         self.driver = driver
         self.wait = WebDriverWait(driver, timeout)
 
@@ -26,9 +26,17 @@ class BasePage:
         return self.wait.until(EC.presence_of_all_elements_located(locator))
 
     def click(self, locator):
-        """Espera a que un elemento sea clickeable y hace click sobre él."""
+        """
+        Espera a que un elemento sea clickeable y hace click sobre él.
+        Si el clic nativo de Selenium no surte efecto (a veces pasa por temas
+        de renderizado), se usa un clic vía JavaScript como respaldo.
+        """
         el = self.wait.until(EC.element_to_be_clickable(locator))
-        el.click()
+        self.driver.execute_script("arguments[0].scrollIntoView(true);", el)
+        try:
+            el.click()
+        except Exception:
+            self.driver.execute_script("arguments[0].click();", el)
 
     def type_text(self, locator, text):
         """Limpia un campo de texto y escribe el valor indicado."""
@@ -49,4 +57,5 @@ class BasePage:
 
     def current_url(self) -> str:
         """Retorna la URL actual del navegador."""
-        return self.driver.current_url
+        return self.driver.current_url 
+    

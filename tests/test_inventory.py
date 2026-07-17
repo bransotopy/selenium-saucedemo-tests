@@ -5,7 +5,7 @@ Casos de prueba relacionados con la página de inventario/productos.
 """
 
 from pages.login_page import LoginPage
-from pages.inventory_page import InventoryPage
+from pages.inventory_page import InventoryPage 
 
 
 def _login_como_standard_user(driver):
