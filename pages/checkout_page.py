@@ -5,7 +5,6 @@ Representa el proceso de checkout (finalizar compra) de SauceDemo.
 """
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 from pages.base_page import BasePage
 
 
@@ -27,30 +26,15 @@ class CheckoutPage(BasePage):
         self.click(self.CHECKOUT_BUTTON)
 
     def fill_checkout_info(self, first_name: str, last_name: str, postal_code: str):
-        """Completa el formulario de datos de envío."""
+        """Completa el formulario de datos de envío y avanza a la página de resumen."""
         self.type_text(self.FIRST_NAME_INPUT, first_name)
         self.type_text(self.LAST_NAME_INPUT, last_name)
         self.type_text(self.POSTAL_CODE_INPUT, postal_code)
-        self.click(self.CONTINUE_BUTTON)
-        self.wait.until(EC.url_contains("checkout-step-two"))
+        self.click_and_wait_for_url(self.CONTINUE_BUTTON, "checkout-step-two")
 
     def finish_purchase(self):
-        """
-        Hace clic en el botón final 'Finish' para completar la compra.
-        Incluye un reintento automático ante posibles fallos de
-        sincronización en el primer clic.
-        """
-        from selenium.common.exceptions import TimeoutException
-
-        for intento in range(2):
-            self.click(self.FINISH_BUTTON)
-            try:
-                self.wait.until(EC.url_contains("checkout-complete"))
-                return
-            except TimeoutException:
-                if intento == 0:
-                    continue
-                raise
+        """Hace clic en el botón final 'Finish' para completar la compra."""
+        self.click_and_wait_for_url(self.FINISH_BUTTON, "checkout-complete")
 
     def get_confirmation_message(self) -> str:
         """Retorna el mensaje de confirmación tras completar la compra."""

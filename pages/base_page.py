@@ -59,3 +59,23 @@ class BasePage:
         """Retorna la URL actual del navegador."""
         return self.driver.current_url 
     
+    def click_and_wait_for_url(self, locator, url_fragment: str, retries: int = 2):
+        """
+        Hace clic en un elemento y espera a que la URL contenga cierto texto,
+        reintentando el clic si la navegación no ocurre a tiempo (esto cubre
+        pequeñas inconsistencias de renderizado/carga del sitio bajo prueba).
+        """
+        from selenium.common.exceptions import TimeoutException
+        from selenium.webdriver.support import expected_conditions as EC
+
+        ultimo_error = None
+        for intento in range(retries):
+            self.click(locator)
+            try:
+                self.wait.until(EC.url_contains(url_fragment))
+                return
+            except TimeoutException as e:
+                ultimo_error = e
+                continue
+        raise ultimo_error
+    
